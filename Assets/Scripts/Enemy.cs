@@ -1,12 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private GameObject target;
+    [SerializeField] private Transform target;
     [SerializeField] private float speed;
     [SerializeField] private GameObject dodgeball;
+    [SerializeField] private float minRange;
+    [SerializeField] private float maxRange;
+
     private GameObject _dodgeball;
     public Transform enemyThrowPoint;
     public float force = 10f;
@@ -14,49 +18,63 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Physics2D.queriesStartInColliders = false;
+        target = FindObjectOfType<PlayerCharacter>().transform;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (alive)
+        if(Vector3.Distance(target.position, transform.position) <= maxRange && Vector3.Distance(target.position, transform.position) >= minRange)
         {
-            transform.eulerAngles = new Vector3(0, 0, -transform.eulerAngles.z);
-            transform.LookAt(target.transform.position, transform.up);
-            transform.Rotate(new Vector3(0, -90, 0), Space.Self);
+            FollowPlayer();
 
-
-
-            if (Vector3.Distance(transform.position, target.transform.position) > 0.5f)
-            {
-                transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
-                transform.Rotate(new Vector3(0, 0, 90));
-            }
-
-            Ray ray = new Ray(transform.position, transform.forward);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.forward);
-            if (hit)
-            {
-                GameObject hitObject = hit.transform.gameObject;
-                if (hitObject.GetComponent<PlayerMovement>() != null)
-                {
-                    if (_dodgeball == null || _dodgeball != null)
-                    {
-                        _dodgeball = Instantiate(dodgeball, enemyThrowPoint.position, enemyThrowPoint.rotation);
-                        Rigidbody2D rb = _dodgeball.GetComponent<Rigidbody2D>();
-                        rb.AddForce(enemyThrowPoint.up * force, ForceMode2D.Impulse);
-                    }
-
-                }
-            }
         }
         else
         {
-            GameObject.Destroy(this);
+            MoveAwayFromPlayer();
         }
+        LookAtPlayer();
+        Shoot();
     }
 
+    public void Shoot()
+    {
+        RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, transform.TransformPoint(Vector3.forward * 1.5f));
+        if (hits != null)
+        {
+            for(int i = 0; i < hits.Length; i++)
+            {
+                if(hits[i].collider.gameObject.GetComponent<Enemy>() == null)
+                {
+                    if(hits[i].collider.gameObject.GetComponent<PlayerCharacter>() != null)
+                    {
+                        if (_dodgeball == null)
+                        {
+                            ///The ball hits the player (add a throwpoint)
+                            _dodgeball = Instantiate(dodgeball) as GameObject;
+                            _dodgeball.transform.position = transform.TransformPoint(Vector3.forward * 1.5f);
+                            _dodgeball.transform.rotation = transform.rotation;
+                            _dodgeball.GetComponent<Rigidbody2D>().AddForce(_dodgeball.transform.up * force, ForceMode2D.Impulse);
+                        }
+                    }
+                    break;
+                }
+            }    
+        }
+    }
+    public void LookAtPlayer()
+    {
+        Vector3 direction = target.position - this.transform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x);
+        this.transform.rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg);
+    }
+    public void FollowPlayer()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
+    }
 
-
+    public void MoveAwayFromPlayer()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, target.position, -speed * Time.deltaTime);
+    }
 }
