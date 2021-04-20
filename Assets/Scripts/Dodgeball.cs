@@ -7,8 +7,6 @@ public class Dodgeball : MonoBehaviour
     private Rigidbody2D rb;
     Vector2 lastVelocity;
 
-    public static bool waveOver = false;
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -31,7 +29,11 @@ public class Dodgeball : MonoBehaviour
     {
         lastVelocity = rb.velocity;
 
-        
+        if(rb.velocity.magnitude <= 2.5)
+        {
+            Destroy(this.gameObject);
+        }
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -62,14 +64,4 @@ public class Dodgeball : MonoBehaviour
 
     }
 
-    /*
-    public IEnumerator ClearBalls()
-    {
-        waveOver = false;
-        yield return new WaitForSeconds(5.0f);
-        Destroy(this.gameObject);
-    }
-    */
 }
-
-
