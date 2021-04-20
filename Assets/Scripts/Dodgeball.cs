@@ -31,10 +31,7 @@ public class Dodgeball : MonoBehaviour
     {
         lastVelocity = rb.velocity;
 
-        if (waveOver)
-        {
-            StartCoroutine(ClearBalls());
-        }
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -65,13 +62,14 @@ public class Dodgeball : MonoBehaviour
 
     }
 
+    /*
     public IEnumerator ClearBalls()
     {
         waveOver = false;
         yield return new WaitForSeconds(5.0f);
-        //Destroy all balls
+        Destroy(this.gameObject);
     }
-
+    */
 }
 
 

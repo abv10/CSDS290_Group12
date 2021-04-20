@@ -8,6 +8,7 @@ public class EnemyDeath : MonoBehaviour
 	public void Die()
     {
         Destroy(this.gameObject);
+        FindObjectOfType<SceneController>().DecreaseEnemyCount();
     }
 
 	// Update is called once per frame

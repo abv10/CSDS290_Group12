@@ -10,11 +10,12 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject dodgeball;
     [SerializeField] private float minRange;
     [SerializeField] private float maxRange;
-
+    public float coolDownTime = 2f;
     private GameObject _dodgeball;
     public Transform enemyThrowPoint;
     public float force = 10f;
     public bool alive;
+    private bool coolDown = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,46 +28,42 @@ public class Enemy : MonoBehaviour
         if(Vector3.Distance(target.position, transform.position) <= maxRange && Vector3.Distance(target.position, transform.position) >= minRange)
         {
             FollowPlayer();
+            Shoot();
 
         }
-        else
+        else if(Vector3.Distance(target.position, transform.position) <= minRange)
         {
             MoveAwayFromPlayer();
         }
+        else
+        {
+            FollowPlayer();
+        }
         LookAtPlayer();
-        Shoot();
     }
 
     public void Shoot()
     {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, transform.TransformPoint(Vector3.forward * 1.5f));
-        if (hits != null)
+        if (!coolDown)
         {
-            for(int i = 0; i < hits.Length; i++)
-            {
-                if(hits[i].collider.gameObject.GetComponent<Enemy>() == null)
-                {
-                    if(hits[i].collider.gameObject.GetComponent<PlayerCharacter>() != null)
-                    {
-                        if (_dodgeball == null)
-                        {
-                            ///The ball hits the player (add a throwpoint)
-                            _dodgeball = Instantiate(dodgeball) as GameObject;
-                            _dodgeball.transform.position = transform.TransformPoint(Vector3.forward * 1.5f);
-                            _dodgeball.transform.rotation = transform.rotation;
-                            _dodgeball.GetComponent<Rigidbody2D>().AddForce(_dodgeball.transform.up * force, ForceMode2D.Impulse);
-                        }
-                    }
-                    break;
-                }
-            }    
-        }
+            ///The ball hits the player (add a throwpoint)
+            _dodgeball = Instantiate(dodgeball, enemyThrowPoint.position, enemyThrowPoint.rotation);
+            _dodgeball.GetComponent<Rigidbody2D>().AddForce(enemyThrowPoint.up * force, ForceMode2D.Impulse);
+            coolDown = true;
+            StartCoroutine(CoolDown());
+        }  
+    }
+
+    private IEnumerator CoolDown()
+    {
+        yield return new WaitForSeconds(coolDownTime);
+        coolDown = false;
     }
     public void LookAtPlayer()
     {
         Vector3 direction = target.position - this.transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x);
-        this.transform.rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg);
+        this.transform.rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg + 90f);
     }
     public void FollowPlayer()
     {

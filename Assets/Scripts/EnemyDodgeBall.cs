@@ -49,10 +49,10 @@ public class EnemyDodgeBall : MonoBehaviour
             p.Hurt();
             Destroy(this.gameObject);
         }
+        //I don't know if we want the enemy to be destroyed by its own dodgeballs
         else if (enemy != null)
         {
-            EnemyDeath e = hitObject.GetComponent<EnemyDeath>();
-            e.Die();
+            //enemy.Die();
             Destroy(this.gameObject);
         }
         else

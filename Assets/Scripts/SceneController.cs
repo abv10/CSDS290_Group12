@@ -3,7 +3,8 @@ using System.Collections;
 
 public class SceneController : MonoBehaviour
 {
-	[SerializeField] private GameObject enemyPrefab;
+	[SerializeField] private GameObject randomEnemy;
+	[SerializeField] private GameObject followerEnemy;
 	private GameObject player;
 	private GameObject enemy;
 	public static int enemyCount = 0;
@@ -35,20 +36,35 @@ public class SceneController : MonoBehaviour
 
 	}
 
+	public void DecreaseEnemyCount()
+    {
+		enemyCount--;
+    }
+
 	public IEnumerator NewWave()
 	{
 		wave++;
-		Dodgeball.waveOver = true;
 
 		yield return new WaitForSeconds(5.0f);
-
+		Dodgeball.waveOver = true; //Irrellevant now
+		var dodgeballs = FindObjectsOfType<Dodgeball>();
+		foreach(Dodgeball d in dodgeballs){
+			Destroy(d.gameObject);
+        }
 		Vector2 player = GameObject.Find("Player").transform.position;
 
 		if (wave <= 10)
 		{
 			for (int i = wave; i > 0; i--)
 			{
-				enemy = Instantiate(enemyPrefab) as GameObject;
+				if(i % 2 == 0)
+                {
+					enemy = Instantiate(randomEnemy) as GameObject;
+				}
+                else
+                {
+					enemy = Instantiate(followerEnemy) as GameObject;
+                }
 				Vector2 location = locations[i - 1];
 				enemy.transform.position = location;
 				float angle = Random.Range(0, 360);
@@ -60,7 +76,14 @@ public class SceneController : MonoBehaviour
 		{
 			for (int i = 10; i > 0; i--)
 			{
-				enemy = Instantiate(enemyPrefab) as GameObject;
+				if (i % 2 == 0)
+				{
+					enemy = Instantiate(randomEnemy) as GameObject;
+				}
+				else
+				{
+					enemy = Instantiate(followerEnemy) as GameObject;
+				}
 				Vector2 location = locations[i - 1];
 				enemy.transform.position = location;
 				float angle = Random.Range(0, 360);
