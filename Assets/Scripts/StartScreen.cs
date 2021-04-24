@@ -46,7 +46,12 @@ public class StartScreen : MonoBehaviour
 
     private void DisplayHighScore()
     {
-        highScoreDisplay.text = "High Score:" + PlayerPrefs.GetInt("highscore");
+        string text = "High Score:" + PlayerPrefs.GetInt("highscore");
+        if (PlayerPrefs.GetInt("highscore") != 0)
+        {
+            text = text + "\n" + "Set on " + PlayerPrefs.GetString("date", "not set yet");
+        }
+        highScoreDisplay.text = text; 
     }
 
     void ViewInstructions()
