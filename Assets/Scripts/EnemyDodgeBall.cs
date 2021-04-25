@@ -7,8 +7,6 @@ public class EnemyDodgeBall : MonoBehaviour
     private Rigidbody2D rb;
     Vector2 lastVelocity;
 
-    public static bool waveOver = false;
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -30,11 +28,6 @@ public class EnemyDodgeBall : MonoBehaviour
     void Update()
     {
         lastVelocity = rb.velocity;
-
-        if (waveOver)
-        {
-            StartCoroutine(ClearBalls());
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -42,6 +35,8 @@ public class EnemyDodgeBall : MonoBehaviour
 
         GameObject hitObject = collision.gameObject;
         EnemyDeath enemy = hitObject.GetComponent<EnemyDeath>();
+        Dodgeball dodgeball = hitObject.GetComponent<Dodgeball>();
+        ShieldPowerUp shield = hitObject.GetComponent<ShieldPowerUp>();
 
         if (hitObject == GameObject.Find("Player"))
         {
@@ -55,6 +50,17 @@ public class EnemyDodgeBall : MonoBehaviour
             //enemy.Die();
             Destroy(this.gameObject);
         }
+        else if (shield != null)
+        {
+            Destroy(this.gameObject);
+        }
+        /* else if (dodgeball != null)
+        {
+            var speed = lastVelocity.magnitude; //We can reduce this if we want
+            var direction = Vector3.Reflect(lastVelocity.normalized, collision.contacts[0].normal);
+
+            rb.velocity = direction * speed;
+        } */    //cool idea but causes ball interaction glitches
         else
         {
             Destroy(this.gameObject);
@@ -62,12 +68,4 @@ public class EnemyDodgeBall : MonoBehaviour
 
     }
 
-    public IEnumerator ClearBalls()
-    {
-        waveOver = false;
-        yield return new WaitForSeconds(5.0f);
-        //Destroy all balls
-    }
-
 }
-

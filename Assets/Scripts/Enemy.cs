@@ -16,6 +16,7 @@ public class Enemy : MonoBehaviour
     public float force = 10f;
     public bool alive;
     private bool coolDown = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,13 +26,13 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Vector3.Distance(target.position, transform.position) <= maxRange && Vector3.Distance(target.position, transform.position) >= minRange)
+        if (Vector3.Distance(target.position, transform.position) <= maxRange && Vector3.Distance(target.position, transform.position) >= minRange)
         {
             FollowPlayer();
             Shoot();
 
         }
-        else if(Vector3.Distance(target.position, transform.position) <= minRange)
+        else if (Vector3.Distance(target.position, transform.position) <= minRange)
         {
             MoveAwayFromPlayer();
         }
@@ -51,7 +52,7 @@ public class Enemy : MonoBehaviour
             _dodgeball.GetComponent<Rigidbody2D>().AddForce(enemyThrowPoint.up * force, ForceMode2D.Impulse);
             coolDown = true;
             StartCoroutine(CoolDown());
-        }  
+        }
     }
 
     private IEnumerator CoolDown()
@@ -72,6 +73,6 @@ public class Enemy : MonoBehaviour
 
     public void MoveAwayFromPlayer()
     {
-        transform.position = Vector3.MoveTowards(transform.position, target.position, -speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, target.position, -speed * Time.deltaTime*0);
     }
 }
