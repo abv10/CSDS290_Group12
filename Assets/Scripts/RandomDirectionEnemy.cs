@@ -63,5 +63,56 @@ public class RandomDirectionEnemy : MonoBehaviour
         Rigidbody2D rb = ball.GetComponent<Rigidbody2D>();
         rb.AddForce(enemyThrowPoint.up * force, ForceMode2D.Impulse);
     }
+    
+     public void increaseSpeed(int speedToAdd)
+    {
+        if (speedToAdd < 11)
+        {
+            if (speedToAdd < 6)
+            {
+                for (int i = 0; i < speedToAdd; i++)
+                {
+                    speed *= 1.2f;
+                }
+            }
+
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    speed *= 1.2f;
+                }
+                for (int i = 0; i < (speedToAdd - 5); i++)
+                {
+                    speed *= 1.1f;
+                }
+            }
+        }
+    }
+    public void increaseForce(int forceToAdd)
+    {
+        if (forceToAdd < 11)
+        {
+            if (forceToAdd < 6)
+            {
+                for (int i = 0; i < forceToAdd; i++)
+                {
+                    force *= 1.2f;
+                }
+            }
+
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                   force *= 1.1f;
+                }
+                for (int i = 0; i < (forceToAdd - 5); i++)
+                {
+                    force *= 1.05f;
+                }
+            }
+        }
+    }
 
 }
