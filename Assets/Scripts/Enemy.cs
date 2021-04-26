@@ -16,6 +16,8 @@ public class Enemy : MonoBehaviour
     public float force = 10f;
     public bool alive;
     private bool coolDown = false;
+    
+    
 
     // Start is called before the first frame update
     void Start()
@@ -74,5 +76,56 @@ public class Enemy : MonoBehaviour
     public void MoveAwayFromPlayer()
     {
         transform.position = Vector3.MoveTowards(transform.position, target.position, -speed * Time.deltaTime*0);
+    }
+    
+     public void increaseSpeed(int speedToAdd)
+    {
+        if (speedToAdd < 11)
+        {
+            if (speedToAdd < 6)
+            {
+                for (int i = 0; i < speedToAdd; i++)
+                {
+                    speed *= 1.2f;
+                }
+            }
+
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    speed *= 1.2f;
+                }
+                for (int i = 0; i < (speedToAdd - 5); i++)
+                {
+                    speed *= 1.1f;
+                }
+            }
+        }
+    }
+    public void increaseForce(int forceToAdd)
+    {
+        if (forceToAdd < 11)
+        {
+            if (forceToAdd < 6)
+            {
+                for (int i = 0; i < forceToAdd; i++)
+                {
+                    force *= 1.2f;
+                }
+            }
+
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                   force *= 1.1f;
+                }
+                for (int i = 0; i < (forceToAdd - 5); i++)
+                {
+                    force *= 1.05f;
+                }
+            }
+        }
     }
 }
