@@ -12,6 +12,9 @@ public class SceneController : MonoBehaviour
 	public static int enemyCount = 0;
 	private int wave = 0;
 	private Vector2[] locations;
+	
+	private int speedToAdd = 0;
+	private int forceToAdd = 0;
 
 	[SerializeField] private GameObject healthPowerUpPrefab;
 	private GameObject healthPowerUp;
@@ -130,10 +133,14 @@ public class SceneController : MonoBehaviour
 				if (i % 2 == 0)
 				{
 					enemy = Instantiate(randomEnemy) as GameObject;
+					enemy.GetComponent<Enemy>().increaseSpeed(speedToAdd);
+					enemy.GetComponent<Enemy>().increaseForce(forceToAdd);
 				}
 				else
 				{
 					enemy = Instantiate(followerEnemy) as GameObject;
+					enemy.GetComponent<Enemy>().increaseSpeed(speedToAdd);
+					enemy.GetComponent<Enemy>().increaseForce(forceToAdd);
 				}
 				Vector2 location = locations[i - 1];
 				enemy.transform.position = location;
