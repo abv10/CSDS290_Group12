@@ -147,6 +147,8 @@ public class SceneController : MonoBehaviour
 				float angle = Random.Range(0, 360);
 				enemy.transform.Rotate(0, 0, angle);
 				enemyCount++;
+				speedToAdd++;
+				forceToAdd++;
 			}
 		}
 		else
@@ -156,10 +158,14 @@ public class SceneController : MonoBehaviour
 				if (i % 2 == 0)
 				{
 					enemy = Instantiate(randomEnemy) as GameObject;
+					enemy.GetComponent<RandomDirectionEnemy>().increaseSpeed(speedToAdd);
+					enemy.GetComponent<RandomDirectionEnemy>().increaseForce(forceToAdd);
 				}
 				else
 				{
 					enemy = Instantiate(followerEnemy) as GameObject;
+					enemy.GetComponent<RandomDirectionEnemy>().increaseSpeed(speedToAdd);
+					enemy.GetComponent<RandomDirectionEnemy>().increaseForce(forceToAdd);
 				}
 				Vector2 location = locations[i - 1];
 				enemy.transform.position = location;
