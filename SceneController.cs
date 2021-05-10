@@ -29,6 +29,9 @@ public class SceneController : MonoBehaviour
 
 	private bool explosiveballactive;
 
+	private bool antibounce;
+	private bool antibouncedone;
+
 	[SerializeField] private Text waveCount;
 	[SerializeField] private Text healthCount;
 	[SerializeField] private Text highScore;
@@ -36,6 +39,8 @@ public class SceneController : MonoBehaviour
 	[SerializeField] private Text streakCount;
 	[SerializeField] private Text shieldtext;
 	[SerializeField] private Text explosiveballtext;
+	[SerializeField] private Text antibouncetext;
+	[SerializeField] private Text antibouncecountdown;
 	private int highScoreValue;
 	public Button quit;
 	public Button restart;
@@ -68,10 +73,16 @@ public class SceneController : MonoBehaviour
 
 		shieldtext.color = new Color32(217, 6, 6, 255);
 		explosiveballtext.color = new Color32(217, 6, 6, 255);
+		antibouncetext.color = new Color32(217, 6, 6, 255);
 		shieldspawn = true;
 		shieldactive = false;
 
 		explosiveballactive = false;
+
+		antibounce = false;
+		antibouncecountdown.gameObject.SetActive(false);
+		antibouncecountdown.color = new Color32(0, 200, 3, 255);
+		antibouncedone = false;
 
 		quit.onClick.AddListener(delegate { SceneManager.LoadScene("StartScreen"); });
 		restart.onClick.AddListener(delegate { SceneManager.LoadScene("Game"); });
@@ -82,46 +93,59 @@ public class SceneController : MonoBehaviour
 		UpdateHealth();
 		UpdateStreak();
 
-		
-
 		//1 Health Power Up spawns every 3 waves
 		if (wave != 0 && wave % 3 == 0 && healthspawn == true)
 		{
 			healthPowerUp = Instantiate(healthPowerUpPrefab) as GameObject;
-			healthPowerUp.transform.position = new Vector2(0,0);
+			healthPowerUp.transform.position = new Vector2(0, 0);
 			healthspawn = false;
 		}
 
 		//Streak Power Ups
 		if (FindObjectOfType<PlayerCharacter>().getStreak() == 0)
-        {
+		{
 			if (shieldactive == false)
-            {
+			{
 				shieldspawn = true;
 				shieldtext.color = new Color32(217, 6, 6, 255);
 			}
 			explosiveballactive = false;
 			explosiveballtext.color = new Color32(217, 6, 6, 255);
+			antibouncetext.color = new Color32(217, 6, 6, 255);
 		}
-		if(shieldTimeRemaining > 0)
-        {
+		if (shieldTimeRemaining > 0)
+		{
 			shieldTimeRemaining -= Time.deltaTime;
 		}
 		else
-        {
+		{
 			shieldTimeRemaining = 0f;
-        }
+		}
 		if (FindObjectOfType<PlayerCharacter>().getStreak() == 3 && shieldspawn == true)
-        {
-			StartCoroutine(ShieldActivate(3.0f));			
+		{
+			StartCoroutine(ShieldActivate(3.0f));
 		}
 
-		if (FindObjectOfType<PlayerCharacter>().getStreak() == 5 && explosiveballactive == false)
-        {
+		if (FindObjectOfType<PlayerCharacter>().getStreak() == 6 && explosiveballactive == false)
+		{
 			explosiveballactive = true;
 			FindObjectOfType<PlayerThrowing>().setExplosive(true);
 			explosiveballtext.color = new Color32(0, 200, 3, 255);
+			//StartCoroutine(ExplosiveBall());
 		}
+
+		if (FindObjectOfType<PlayerCharacter>().getStreak() == 10 && antibounce == false && antibouncedone == false)
+        {
+			antibounce = true;
+			antibouncetext.color = new Color32(0, 200, 3, 255);
+			StartCoroutine(AntiBounce());
+		}
+
+		if ((FindObjectOfType<PlayerCharacter>().getStreak() % 10) != 0)
+        {
+			antibouncedone = false;
+        }
+
 		//New Wave
 		if (enemyCount == 0)
 		{
@@ -149,8 +173,8 @@ public class SceneController : MonoBehaviour
 			Destroy(d.gameObject);
 		}
 		//Reactivate Shield
-		if(shieldReactivateTime != 0)
-        {
+		if (shieldReactivateTime != 0)
+		{
 			StartCoroutine(ShieldActivate(shieldReactivateTime));
 		}
 
@@ -167,7 +191,8 @@ public class SceneController : MonoBehaviour
 					enemy.GetComponent<Enemy>().increaseSpeed(speedToAdd);
 					enemy.GetComponent<Enemy>().increaseForce(forceToAdd);
 				}
-				else if (randomizer < 9) {
+				else if (randomizer < 9)
+				{
 					enemy = Instantiate(randomEnemy) as GameObject;
 					enemy.GetComponent<RandomDirectionEnemy>().increaseSpeed(speedToAdd);
 					enemy.GetComponent<RandomDirectionEnemy>().increaseForce(forceToAdd);
@@ -245,10 +270,16 @@ public class SceneController : MonoBehaviour
 			PlayerPrefs.SetString("date", System.DateTime.Now.ToLongDateString());
 			PlayerPrefs.Save();
 		}
+ 		if(streakhighscore > PlayerPrefs.GetInt("streak", 0))
+        {
+			PlayerPrefs.SetInt("streak", streakhighscore);
+			PlayerPrefs.SetString("streakDate", System.DateTime.Now.ToLongDateString());
+			PlayerPrefs.Save();
+		}
 		gameover.SetActive(true);
 		StartCoroutine(Gameover());
 		finalwave.text = "Score: " + wave;
-		higheststreak.text = "Highest Streak: " + streakhighscore;
+		higheststreak.text = "Best Streak: " + streakhighscore;
 		DisplayHighScore();
 		FindObjectOfType<MusicControllerGame>().GameOver();
 	}
@@ -264,26 +295,26 @@ public class SceneController : MonoBehaviour
 	}
 
 	public void UpdateStreak()
-    {
+	{
 		streakCount.text = "Streak: " + FindObjectOfType<PlayerCharacter>().getStreak();
 		if (streakhighscore < FindObjectOfType<PlayerCharacter>().getStreak())
-        {
+		{
 			streakhighscore = FindObjectOfType<PlayerCharacter>().getStreak();
 		}
 	}
 
 	public int getWave()
-    {
+	{
 		return wave;
-    }
+	}
 
 	public bool getShieldActive()
-    {
+	{
 		return shieldactive;
-    }
+	}
 
 	public IEnumerator ShieldActivate(float time)
-    {
+	{
 		shieldTimeRemaining = time;
 		shield = Instantiate(shieldPrefab) as GameObject;
 		shield.transform.position = FindObjectOfType<PlayerCharacter>().transform.position;
@@ -292,20 +323,21 @@ public class SceneController : MonoBehaviour
 		shieldtext.color = new Color32(0, 200, 3, 255);
 
 		yield return new WaitForSeconds(time);
-		
+
 		shieldactive = false;
 		Destroy(shield);
 		if (FindObjectOfType<PlayerCharacter>().getStreak() < 3)
-        {
+		{
 			shieldspawn = true;
 			shieldtext.color = new Color32(217, 6, 6, 255);
 		}
+		//shieldtext.color = new Color32(217, 6, 6, 255);
 	}
 
 	public IEnumerator Gameover()
-    {
-		while(true)
-        {
+	{
+		while (true)
+		{
 			gameovertext.text = "GAMEOVER";
 
 			yield return new WaitForSeconds(0.75f);
@@ -323,11 +355,11 @@ public class SceneController : MonoBehaviour
 			PlayerPrefs.SetInt("highscore", 0);
 			PlayerPrefs.Save();
 		}
-		highScore.text = "High Score: " + PlayerPrefs.GetInt("highscore");
+		highScore.text = "High Score: " + PlayerPrefs.GetInt("highscore") + "\n" + "High Streak: " + PlayerPrefs.GetInt("streak");
 	}
 
 	public IEnumerator CountDown()
-    {
+	{
 		countdown.gameObject.SetActive(true);
 		countdown.text = "Next Wave In:\n5";
 		yield return new WaitForSeconds(1.0f);
@@ -341,5 +373,30 @@ public class SceneController : MonoBehaviour
 		yield return new WaitForSeconds(1.0f);
 		countdown.gameObject.SetActive(false);
 	}
+
+	public IEnumerator AntiBounce()
+    {
+		antibouncecountdown.gameObject.SetActive(true);
+		antibouncecountdown.text = "5";
+		yield return new WaitForSeconds(1.0f);
+		antibouncecountdown.text = "4";
+		yield return new WaitForSeconds(1.0f);
+		antibouncecountdown.text = "3";
+		yield return new WaitForSeconds(1.0f);
+		antibouncecountdown.text = "2";
+		yield return new WaitForSeconds(1.0f);
+		antibouncecountdown.text = "1";
+		yield return new WaitForSeconds(1.0f);
+		antibouncecountdown.gameObject.SetActive(false);
+
+		//antibouncetext.color = new Color32(217, 6, 6, 255);
+		antibounce = false;
+		//antibouncedone = true;
+	}
+
+	public bool getAntiBounce()
+    {
+		return antibounce;
+    }
 
 }
